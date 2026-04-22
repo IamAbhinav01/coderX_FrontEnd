@@ -1,0 +1,12 @@
+.kineticX {
+  text-shadow: 0 0 12px rgba(255, 49, 49, 0.4);
+}
+.hero {
+  max-width: 130rem;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+.heroImg {
+  width: 100%;
+}

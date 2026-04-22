@@ -1,3 +1,311 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ── Geist OpenType ligatures (structural, not decorative) ────────── */
+@layer base {
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Geist', Arial, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', sans-serif;
+    font-feature-settings: "liga" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #171717;
+    min-height: 100dvh;
+  }
+
+  /* Monospace elements use Geist Mono */
+  code, pre, kbd, samp, .font-mono {
+    font-family: 'Geist Mono', ui-monospace, SFMono-Regular, 'Roboto Mono', Menlo, Monaco, 'Courier New', monospace;
+    font-feature-settings: "liga" 1, "tnum" 1;
+  }
+
+  /* Text selection */
+  ::selection {
+    background-color: hsla(0, 0%, 95%, 1);
+    color: #171717;
+  }
+
+  /* Focus ring — blue, consistent across all interactive elements */
+  :focus-visible {
+    outline: 2px solid hsla(212, 100%, 48%, 1);
+    outline-offset: 2px;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Geist', Arial, sans-serif;
+    font-feature-settings: "liga" 1;
+    color: #171717;
+  }
+}
+
+/* ── Material Symbols Icon configuration ──────────────────────────── */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  vertical-align: -0.125em;
+  user-select: none;
+}
+.material-symbols-filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ── Vercel Typography Utilities ──────────────────────────────────── */
+@layer components {
+  /* Display hero — 48px, weight 600, -2.4px tracking */
+  .text-display {
+    font-size: 3rem;
+    font-weight: 600;
+    line-height: 1.00;
+    letter-spacing: -0.05em;
+    font-family: 'Geist', Arial, sans-serif;
+    font-feature-settings: "liga" 1;
+  }
+
+  /* 64px display */
+  .text-display-lg {
+    font-size: 4rem;
+    font-weight: 600;
+    line-height: 1.00;
+    letter-spacing: -0.05em;
+    font-family: 'Geist', Arial, sans-serif;
+    font-feature-settings: "liga" 1;
+  }
+
+  /* Section heading — 40px, weight 600, -2.4px tracking */
+  .text-section {
+    font-size: 2.5rem;
+    font-weight: 600;
+    line-height: 1.20;
+    letter-spacing: -0.06em;
+    font-family: 'Geist', Arial, sans-serif;
+    font-feature-settings: "liga" 1;
+  }
+
+  /* Sub-heading — 32px, weight 600, -1.28px tracking */
+  .text-sub-lg {
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.04em;
+    font-family: 'Geist', Arial, sans-serif;
+    font-feature-settings: "liga" 1;
+  }
+
+  /* Card title — 24px, weight 600, -0.96px tracking */
+  .text-card-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    line-height: 1.33;
+    letter-spacing: -0.04em;
+    font-family: 'Geist', Arial, sans-serif;
+    font-feature-settings: "liga" 1;
+  }
+
+  /* Body large — 20px, weight 400, normal tracking */
+  .text-body-lg {
+    font-size: 1.25rem;
+    font-weight: 400;
+    line-height: 1.80;
+    letter-spacing: 0;
+  }
+
+  /* Body — 16px, weight 400 */
+  .text-body {
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.50;
+    letter-spacing: 0;
+  }
+
+  /* Mono body — 16px Geist Mono */
+  .text-mono {
+    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.50;
+    letter-spacing: 0;
+    font-feature-settings: "liga" 1, "tnum" 1;
+  }
+
+  /* Mono caption — 13px, uppercase */
+  .text-mono-label {
+    font-family: 'Geist Mono', ui-monospace, monospace;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    line-height: 1.54;
+    letter-spacing: 0;
+    text-transform: uppercase;
+    font-feature-settings: "liga" 1, "tnum" 1;
+  }
+}
+
+/* ── Vercel Card Shadow System ────────────────────────────────────── */
+@layer components {
+  /* Level 1 — Ring border (replaces CSS border) */
+  .shadow-ring {
+    box-shadow: 0px 0px 0px 1px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Level 1b — Light ring (tabs, images) */
+  .shadow-light-ring {
+    box-shadow: rgb(235, 235, 235) 0px 0px 0px 1px;
+  }
+
+  /* Level 2 — Standard card */
+  .shadow-card {
+    box-shadow:
+      0px 0px 0px 1px rgba(0, 0, 0, 0.08),
+      0px 2px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Level 3 — Featured card with inner glow */
+  .shadow-card-featured {
+    box-shadow:
+      0px 0px 0px 1px rgba(0, 0, 0, 0.08),
+      0px 2px 2px rgba(0, 0, 0, 0.04),
+      0px 8px 8px -8px rgba(0, 0, 0, 0.04),
+      inset 0px 0px 0px 1px #fafafa;
+  }
+
+  /* Hover — intensified ring */
+  .shadow-card:hover,
+  .shadow-card-featured:hover {
+    box-shadow:
+      0px 0px 0px 1px rgba(0, 0, 0, 0.12),
+      0px 4px 8px rgba(0, 0, 0, 0.08);
+    transition: box-shadow 0.15s ease;
+  }
+}
+
+/* ── Vercel Button System ─────────────────────────────────────────── */
+@layer components {
+  /* Primary dark button — #171717 bg, white text */
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #171717;
+    color: #ffffff;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.43;
+    letter-spacing: 0;
+    cursor: pointer;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+    border: none;
+    outline: none;
+    font-family: 'Geist', Arial, sans-serif;
+  }
+  .btn-primary:hover {
+    background-color: #000000;
+  }
+  .btn-primary:focus-visible {
+    outline: 2px solid hsla(212, 100%, 48%, 1);
+    outline-offset: 2px;
+  }
+
+  /* Ghost button — white bg, shadow-border */
+  .btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #ffffff;
+    color: #171717;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.43;
+    letter-spacing: 0;
+    cursor: pointer;
+    box-shadow: rgb(235, 235, 235) 0px 0px 0px 1px;
+    transition: box-shadow 0.15s ease, background-color 0.15s ease;
+    border: none;
+    outline: none;
+    font-family: 'Geist', Arial, sans-serif;
+  }
+  .btn-ghost:hover {
+    background-color: #fafafa;
+    box-shadow: rgb(215, 215, 215) 0px 0px 0px 1px;
+  }
+  .btn-ghost:focus-visible {
+    outline: 2px solid hsla(212, 100%, 48%, 1);
+    outline-offset: 2px;
+  }
+
+  /* Pill badge — blue tint */
+  .badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    background-color: #ebf5ff;
+    color: #0068d6;
+    padding: 0px 10px;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.33;
+    font-family: 'Geist', Arial, sans-serif;
+  }
+}
+
+/* ── Kinetic X glow (brand) ───────────────────────────────────────── */
+.kinetic-x {
+  color: #ff5b4f;
+  text-shadow: 0 0 20px rgba(255, 91, 79, 0.35);
+}
+
+/* ── Glass panel ──────────────────────────────────────────────────── */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.80);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── Scrollbar (minimal, Vercel-style) ────────────────────────────── */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #fafafa; }
+::-webkit-scrollbar-thumb { background: #ebebeb; border-radius: 9999px; }
+
+/* ── Section dividers — full-width dark line ──────────────────────── */
+.section-divider {
+  border-bottom: 1px solid #171717;
+  width: 100%;
+}
+
+/* ── Workflow accent utilities ─────────────────────────────────────── */
+.step-develop { color: #0a72ef; }
+.step-preview { color: #de1d8d; }
+.step-ship    { color: #ff5b4f; }
+
+/* ── Micro-animations ─────────────────────────────────────────────── */
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.6; transform: scale(0.85); }
+}
+.animate-pulse-dot { animation: pulse-dot 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up { animation: slide-up 0.4s ease forwards; }
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-fade-in { animation: fade-in 0.5s ease forwards; }
