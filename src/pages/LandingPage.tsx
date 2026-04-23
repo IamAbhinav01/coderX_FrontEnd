@@ -1,8 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 
-/* ─── Feature Cards are rendered inline below ──────────────────────── */
-
-/* ─── Workflow steps ───────────────────────────────────────────────── */
 const steps = [
   {
     label: 'GENERATE',
@@ -30,7 +27,7 @@ const metrics = [
   { value: '94%', label: 'Interview pass rate', id: 'metric-pass' },
   { value: '10x', label: 'Faster skill growth', id: 'metric-growth' },
 ];
-
+const name = 'Abhinav';
 export default function LandingPage() {
   const navigate = useNavigate();
 
@@ -44,7 +41,6 @@ export default function LandingPage() {
             className="w-1.5 h-1.5 rounded-full bg-[#0a72ef] animate-pulse-dot"
             aria-hidden="true"
           />
-          v2.0 — Powered by DeepCode AI
         </div>
 
         {/* Hero headline */}
@@ -56,8 +52,7 @@ export default function LandingPage() {
             letterSpacing: '-0.05em',
           }}
         >
-          coder<span className="kinetic-x">X</span>
-          {' '}—{' '}
+          coder<span className="kinetic-x">X</span> —{' '}
           <br className="hidden sm:block" />
           Generate Coding Challenges
           <br />
@@ -67,7 +62,11 @@ export default function LandingPage() {
         {/* Subtitle */}
         <p
           className="max-w-[600px] mx-auto text-[#4d4d4d] mb-10"
-          style={{ fontSize: '1.25rem', lineHeight: '1.80', letterSpacing: '0' }}
+          style={{
+            fontSize: '1.25rem',
+            lineHeight: '1.80',
+            letterSpacing: '0',
+          }}
         >
           Elevate your technical skills with AI-engineered coding interview
           questions tailored exactly to your seniority and target role.
@@ -78,13 +77,17 @@ export default function LandingPage() {
           id="hero-prompt-bar"
           className="w-full max-w-2xl mx-auto mb-8"
           style={{
-            boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 2px 2px rgba(0,0,0,0.04)',
+            boxShadow:
+              '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 2px 2px rgba(0,0,0,0.04)',
             borderRadius: '8px',
           }}
         >
           <div className="flex flex-col sm:flex-row overflow-hidden rounded-card">
             <div className="relative flex-1 flex items-center bg-white">
-              <span className="material-symbols-outlined absolute left-4 text-[#808080] text-xl" aria-hidden="true">
+              <span
+                className="material-symbols-outlined absolute left-4 text-[#808080] text-xl"
+                aria-hidden="true"
+              >
                 auto_awesome
               </span>
               <input
@@ -100,7 +103,12 @@ export default function LandingPage() {
               className="btn-primary rounded-none sm:rounded-r-card px-6 py-4 justify-center whitespace-nowrap text-sm"
               onClick={() => navigate('/problem/1')}
             >
-              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">bolt</span>
+              <span
+                className="material-symbols-outlined text-[16px]"
+                aria-hidden="true"
+              >
+                bolt
+              </span>
               Generate Problem
             </button>
           </div>
@@ -158,16 +166,24 @@ export default function LandingPage() {
               id={id}
               className="text-center py-8 px-6 rounded-card transition-shadow duration-200"
               style={{
-                boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 2px 2px rgba(0,0,0,0.04), 0px 0px 0px 1px #fafafa',
+                boxShadow:
+                  '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 2px 2px rgba(0,0,0,0.04), 0px 0px 0px 1px #fafafa',
               }}
             >
               <div
                 className="font-sans font-semibold text-[#171717] mb-2"
-                style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', letterSpacing: '-0.05em', lineHeight: '1' }}
+                style={{
+                  fontSize: 'clamp(2rem, 5vw, 3rem)',
+                  letterSpacing: '-0.05em',
+                  lineHeight: '1',
+                }}
               >
                 {value}
               </div>
-              <div className="text-[#4d4d4d]" style={{ fontSize: '0.875rem', fontWeight: '400' }}>
+              <div
+                className="text-[#4d4d4d]"
+                style={{ fontSize: '0.875rem', fontWeight: '400' }}
+              >
                 {label}
               </div>
             </div>
@@ -183,11 +199,18 @@ export default function LandingPage() {
         <div className="mb-14 text-center">
           <h2
             className="font-sans font-semibold text-[#171717] mb-4"
-            style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', letterSpacing: '-0.05em', lineHeight: '1.2' }}
+            style={{
+              fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
+              letterSpacing: '-0.05em',
+              lineHeight: '1.2',
+            }}
           >
             From prompt to submission
           </h2>
-          <p className="text-[#4d4d4d] max-w-md mx-auto" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
+          <p
+            className="text-[#4d4d4d] max-w-md mx-auto"
+            style={{ fontSize: '1rem', lineHeight: '1.6' }}
+          >
             A three-stage pipeline that mirrors real engineering workflows.
           </p>
         </div>
@@ -196,7 +219,9 @@ export default function LandingPage() {
           {/* Connector line (desktop) */}
           <div
             className="hidden md:block absolute top-8 left-[calc(33%+2rem)] right-[calc(33%+2rem)] h-px"
-            style={{ background: 'linear-gradient(90deg, #0a72ef, #de1d8d, #ff5b4f)' }}
+            style={{
+              background: 'linear-gradient(90deg, #0a72ef, #de1d8d, #ff5b4f)',
+            }}
             aria-hidden="true"
           />
 
@@ -215,23 +240,27 @@ export default function LandingPage() {
               </div>
 
               {/* Mono label */}
-              <span
-                className="text-mono-label mb-2"
-                style={{ color }}
-              >
+              <span className="text-mono-label mb-2" style={{ color }}>
                 {label}
               </span>
 
               {/* Title */}
               <h3
                 className="font-sans font-semibold text-[#171717] mb-2"
-                style={{ fontSize: '1.25rem', letterSpacing: '-0.03em', lineHeight: '1.3' }}
+                style={{
+                  fontSize: '1.25rem',
+                  letterSpacing: '-0.03em',
+                  lineHeight: '1.3',
+                }}
               >
                 {title}
               </h3>
 
               {/* Description */}
-              <p className="text-[#4d4d4d]" style={{ fontSize: '0.875rem', lineHeight: '1.6' }}>
+              <p
+                className="text-[#4d4d4d]"
+                style={{ fontSize: '0.875rem', lineHeight: '1.6' }}
+              >
                 {desc}
               </p>
             </div>
@@ -247,9 +276,15 @@ export default function LandingPage() {
         <div className="mb-12 text-center">
           <h2
             className="font-sans font-semibold text-[#171717] mb-4"
-            style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', letterSpacing: '-0.05em', lineHeight: '1.2' }}
+            style={{
+              fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
+              letterSpacing: '-0.05em',
+              lineHeight: '1.2',
+            }}
           >
-            Engineering intelligence,<br />built in.
+            Engineering intelligence,
+            <br />
+            built in.
           </h2>
         </div>
 
@@ -258,22 +293,42 @@ export default function LandingPage() {
           <div
             id="feature-ai-problems"
             className="md:col-span-2 md:row-span-2 rounded-image p-8 flex flex-col justify-between overflow-hidden relative group bg-[#fafafa] transition-shadow duration-200"
-            style={{ boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 2px 2px rgba(0,0,0,0.04)' }}
+            style={{
+              boxShadow:
+                '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 2px 2px rgba(0,0,0,0.04)',
+            }}
           >
             <div className="z-10 relative">
-              <span className="badge-pill mb-5 inline-flex" style={{ color: '#0068d6' }}>
-                <span className="material-symbols-outlined text-sm" aria-hidden="true">neurology</span>
+              <span
+                className="badge-pill mb-5 inline-flex"
+                style={{ color: '#0068d6' }}
+              >
+                <span
+                  className="material-symbols-outlined text-sm"
+                  aria-hidden="true"
+                >
+                  neurology
+                </span>
                 Generate
               </span>
               <h3
                 className="font-sans font-semibold text-[#171717] mb-3"
-                style={{ fontSize: 'clamp(1.25rem, 3vw, 1.75rem)', letterSpacing: '-0.04em', lineHeight: '1.2' }}
+                style={{
+                  fontSize: 'clamp(1.25rem, 3vw, 1.75rem)',
+                  letterSpacing: '-0.04em',
+                  lineHeight: '1.2',
+                }}
               >
-                AI-Generated<br />Coding Problems
+                AI-Generated
+                <br />
+                Coding Problems
               </h3>
-              <p className="text-[#4d4d4d] max-w-xs" style={{ fontSize: '0.9375rem', lineHeight: '1.6' }}>
-                Our neural engine creates unique, never-before-seen challenges that prevent rote
-                memorization and test true logical capability.
+              <p
+                className="text-[#4d4d4d] max-w-xs"
+                style={{ fontSize: '0.9375rem', lineHeight: '1.6' }}
+              >
+                Our neural engine creates unique, never-before-seen challenges
+                that prevent rote memorization and test true logical capability.
               </p>
             </div>
 
@@ -294,11 +349,22 @@ export default function LandingPage() {
           <div
             id="feature-difficulty"
             className="rounded-image p-7 flex flex-col justify-between bg-white group transition-shadow duration-200"
-            style={{ boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 2px 2px rgba(0,0,0,0.04)' }}
+            style={{
+              boxShadow:
+                '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 2px 2px rgba(0,0,0,0.04)',
+            }}
           >
             <div>
-              <span className="badge-pill mb-4 inline-flex" style={{ color: '#de1d8d', background: '#fdf0f8' }}>
-                <span className="material-symbols-outlined text-sm" aria-hidden="true">signal_cellular_alt</span>
+              <span
+                className="badge-pill mb-4 inline-flex"
+                style={{ color: '#de1d8d', background: '#fdf0f8' }}
+              >
+                <span
+                  className="material-symbols-outlined text-sm"
+                  aria-hidden="true"
+                >
+                  signal_cellular_alt
+                </span>
                 Test
               </span>
               <h3
@@ -307,8 +373,12 @@ export default function LandingPage() {
               >
                 Custom Difficulty
               </h3>
-              <p className="text-[#4d4d4d]" style={{ fontSize: '0.875rem', lineHeight: '1.6' }}>
-                From LeetCode Easy to competitive programming nightmares—calibrated to your level.
+              <p
+                className="text-[#4d4d4d]"
+                style={{ fontSize: '0.875rem', lineHeight: '1.6' }}
+              >
+                From LeetCode Easy to competitive programming
+                nightmares—calibrated to your level.
               </p>
             </div>
             {/* Mini difficulty visual */}
@@ -319,7 +389,8 @@ export default function LandingPage() {
                   className="flex-1 rounded-micro transition-all duration-300 group-hover:opacity-100"
                   style={{
                     height: `${h * 0.35}px`,
-                    background: i < 2 ? '#0a72ef' : i < 4 ? '#de1d8d' : '#ff5b4f',
+                    background:
+                      i < 2 ? '#0a72ef' : i < 4 ? '#de1d8d' : '#ff5b4f',
                     opacity: 0.7,
                   }}
                 />
@@ -331,11 +402,22 @@ export default function LandingPage() {
           <div
             id="feature-languages"
             className="rounded-image p-7 flex flex-col justify-between bg-white transition-shadow duration-200"
-            style={{ boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 2px 2px rgba(0,0,0,0.04)' }}
+            style={{
+              boxShadow:
+                '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 2px 2px rgba(0,0,0,0.04)',
+            }}
           >
             <div>
-              <span className="badge-pill mb-4 inline-flex" style={{ color: '#ff5b4f', background: '#fff3f2' }}>
-                <span className="material-symbols-outlined text-sm" aria-hidden="true">terminal</span>
+              <span
+                className="badge-pill mb-4 inline-flex"
+                style={{ color: '#ff5b4f', background: '#fff3f2' }}
+              >
+                <span
+                  className="material-symbols-outlined text-sm"
+                  aria-hidden="true"
+                >
+                  terminal
+                </span>
                 Submit
               </span>
               <h3
@@ -344,7 +426,10 @@ export default function LandingPage() {
               >
                 Multi-Language
               </h3>
-              <p className="text-[#4d4d4d]" style={{ fontSize: '0.875rem', lineHeight: '1.6' }}>
+              <p
+                className="text-[#4d4d4d]"
+                style={{ fontSize: '0.875rem', lineHeight: '1.6' }}
+              >
                 Python, Java, C++, TypeScript, Rust, and Go supported natively.
               </p>
             </div>
@@ -364,7 +449,10 @@ export default function LandingPage() {
           <div
             id="feature-feedback"
             className="md:col-span-3 rounded-image p-7 flex flex-col md:flex-row items-start md:items-center gap-8 bg-white transition-shadow duration-200"
-            style={{ boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 2px 2px rgba(0,0,0,0.04)' }}
+            style={{
+              boxShadow:
+                '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 2px 2px rgba(0,0,0,0.04)',
+            }}
           >
             <div className="flex-1">
               <h3
@@ -373,9 +461,13 @@ export default function LandingPage() {
               >
                 Instant feedback & explanations
               </h3>
-              <p className="text-[#4d4d4d]" style={{ fontSize: '0.9375rem', lineHeight: '1.6' }}>
-                Not just "Correct" or "Incorrect." Get deep architectural analysis and complexity
-                breakdown of your solutions in real-time.
+              <p
+                className="text-[#4d4d4d]"
+                style={{ fontSize: '0.9375rem', lineHeight: '1.6' }}
+              >
+                Not just "Correct" or "Incorrect." Get deep architectural
+                analysis and complexity breakdown of your solutions in
+                real-time.
               </p>
             </div>
             <div
@@ -389,9 +481,15 @@ export default function LandingPage() {
                 <div className="w-3 h-3 rounded-full bg-[#0a72ef] opacity-60" />
               </div>
               <div className="text-[#de1d8d] mb-0.5">// Analysis Complete</div>
-              <div className="text-[#4d4d4d]">Efficiency: <span className="text-[#0a72ef]">O(log n)</span></div>
-              <div className="text-[#4d4d4d]">Memory: <span className="text-[#0a72ef]">O(H)</span></div>
-              <div className="text-[#808080] mt-1">💡 Consider edge case for empty arrays.</div>
+              <div className="text-[#4d4d4d]">
+                Efficiency: <span className="text-[#0a72ef]">O(log n)</span>
+              </div>
+              <div className="text-[#4d4d4d]">
+                Memory: <span className="text-[#0a72ef]">O(H)</span>
+              </div>
+              <div className="text-[#808080] mt-1">
+                💡 Consider edge case for empty arrays.
+              </div>
             </div>
           </div>
         </div>
@@ -405,20 +503,29 @@ export default function LandingPage() {
         <div
           className="max-w-2xl mx-auto rounded-image py-16 px-8"
           style={{
-            boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 2px 2px rgba(0,0,0,0.04), 0px 0px 0px 1px #fafafa',
+            boxShadow:
+              '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 2px 2px rgba(0,0,0,0.04), 0px 0px 0px 1px #fafafa',
             background: '#fafafa',
           }}
         >
           <h2
             className="font-sans font-semibold text-[#171717] mb-4"
-            style={{ fontSize: 'clamp(1.75rem, 4vw, 2.5rem)', letterSpacing: '-0.05em', lineHeight: '1.2' }}
+            style={{
+              fontSize: 'clamp(1.75rem, 4vw, 2.5rem)',
+              letterSpacing: '-0.05em',
+              lineHeight: '1.2',
+            }}
           >
             Stop Memorizing.
             <br />
             Start Engineering.
           </h2>
-          <p className="text-[#4d4d4d] mb-8 max-w-md mx-auto" style={{ fontSize: '1rem', lineHeight: '1.6' }}>
-            Join the next generation of engineers who use AI to sharpen their problem-solving edge.
+          <p
+            className="text-[#4d4d4d] mb-8 max-w-md mx-auto"
+            style={{ fontSize: '1rem', lineHeight: '1.6' }}
+          >
+            Join the next generation of engineers who use AI to sharpen their
+            problem-solving edge.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-3">
             <button
@@ -427,7 +534,12 @@ export default function LandingPage() {
               onClick={() => navigate('/dashboard')}
             >
               Get Started Free
-              <span className="material-symbols-outlined text-[16px]" aria-hidden="true">arrow_forward</span>
+              <span
+                className="material-symbols-outlined text-[16px]"
+                aria-hidden="true"
+              >
+                arrow_forward
+              </span>
             </button>
             <button
               id="cta-generate-btn"
@@ -448,7 +560,12 @@ export default function LandingPage() {
         <div className="max-w-content mx-auto px-6 py-12 flex flex-col md:flex-row justify-between items-center gap-6">
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[#ff5b4f] text-lg" aria-hidden="true">terminal</span>
+            <span
+              className="material-symbols-outlined text-[#ff5b4f] text-lg"
+              aria-hidden="true"
+            >
+              terminal
+            </span>
             <span
               className="font-sans font-semibold text-[#171717]"
               style={{ fontSize: '1rem', letterSpacing: '-0.02em' }}
@@ -459,7 +576,10 @@ export default function LandingPage() {
 
           {/* Links */}
           <nav aria-label="Footer navigation">
-            <div className="flex gap-6 text-[#666666]" style={{ fontSize: '0.875rem' }}>
+            <div
+              className="flex gap-6 text-[#666666]"
+              style={{ fontSize: '0.875rem' }}
+            >
               {['Privacy', 'Terms', 'API', 'GitHub'].map((link) => (
                 <a
                   key={link}
@@ -474,7 +594,7 @@ export default function LandingPage() {
 
           {/* Copyright */}
           <div className="text-mono-label text-[#808080]">
-            © 2026 CODERX LABS
+            © 2026 Abhinav Sunil
           </div>
         </div>
       </footer>

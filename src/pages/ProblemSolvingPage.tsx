@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Editor from '@monaco-editor/react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 /* ─── Problem data ─────────────────────────────────────────────────── */
 const problem = {
@@ -13,13 +14,13 @@ const problem = {
   examples: [
     {
       id: 'ex-1',
-      input:  'root = [3, 9, 20, null, null, 15, 7]',
+      input: 'root = [3, 9, 20, null, null, 15, 7]',
       output: '[[3], [9, 20], [15, 7]]',
       explanation: 'Three levels: root, then left/right, then their children.',
     },
     {
       id: 'ex-2',
-      input:  'root = [1]',
+      input: 'root = [1]',
       output: '[[1]]',
       explanation: 'Single node, one level.',
     },
@@ -65,28 +66,39 @@ class Solution:
         return result
 `;
 
-const langOptions = ['Python', 'JavaScript', 'C++', 'Java', 'Go'];
+const langOptions = ['Python', 'C++', 'Java'];
 
 export default function ProblemSolvingPage() {
   const navigate = useNavigate();
-  const [lang,        setLang]        = useState('Python');
-  const [code,        setCode]        = useState(STARTER_CODE);
-  const [activePanel, setActivePanel] = useState<'console' | 'testcases'>('console');
-  const [isRunning,   setIsRunning]   = useState(false);
+  const [lang, setLang] = useState('Python');
+  const [code, setCode] = useState('');
+  const [activePanel, setActivePanel] = useState<'console' | 'testcases'>(
+    'console'
+  );
+  const [isRunning, setIsRunning] = useState(false);
   const [showLangMenu, setShowLangMenu] = useState(false);
 
   const handleRun = () => {
     setIsRunning(true);
-    setTimeout(() => { setIsRunning(false); setActivePanel('console'); }, 1500);
+    setTimeout(() => {
+      setIsRunning(false);
+      setActivePanel('console');
+    }, 1500);
   };
 
   const handleSubmit = () => {
-    navigate('/feedback');
+    try {
+      // navigate('/feedback');
+      console.log(code);
+      console.log(lang);
+      // const response = await axios.post();
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
     <div className="bg-white h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden">
-
       {/* ── EDITOR HEADER BAR ──────────────────────────────────────── */}
       <div
         className="flex items-center justify-between px-4 py-2 bg-white flex-shrink-0"
@@ -108,11 +120,17 @@ export default function ProblemSolvingPage() {
             <div className="flex items-center gap-2 mt-0.5">
               <span
                 className="text-mono-label px-1.5 py-0.5 rounded-micro"
-                style={{ fontSize: '10px', color: problem.difficultyColor, background: `${problem.difficultyColor}18` }}
+                style={{
+                  fontSize: '10px',
+                  color: problem.difficultyColor,
+                  background: `${problem.difficultyColor}18`,
+                }}
               >
                 {problem.difficulty}
               </span>
-              <span className="text-[#808080]" style={{ fontSize: '11px' }}>{problem.topic}</span>
+              <span className="text-[#808080]" style={{ fontSize: '11px' }}>
+                {problem.topic}
+              </span>
             </div>
           </div>
         </div>
@@ -126,9 +144,19 @@ export default function ProblemSolvingPage() {
             aria-haspopup="listbox"
             aria-expanded={showLangMenu}
           >
-            <span className="material-symbols-outlined text-sm" aria-hidden="true">code</span>
+            <span
+              className="material-symbols-outlined text-sm"
+              aria-hidden="true"
+            >
+              code
+            </span>
             <span style={{ fontSize: '0.8125rem' }}>{lang}</span>
-            <span className="material-symbols-outlined text-sm" aria-hidden="true">expand_more</span>
+            <span
+              className="material-symbols-outlined text-sm"
+              aria-hidden="true"
+            >
+              expand_more
+            </span>
           </button>
 
           {showLangMenu && (
@@ -136,7 +164,10 @@ export default function ProblemSolvingPage() {
               id="lang-dropdown"
               role="listbox"
               className="absolute right-0 top-full mt-1 bg-white rounded-card py-1 z-10 min-w-[130px]"
-              style={{ boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 4px 8px rgba(0,0,0,0.08)' }}
+              style={{
+                boxShadow:
+                  '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 4px 8px rgba(0,0,0,0.08)',
+              }}
             >
               {langOptions.map((l) => (
                 <button
@@ -148,7 +179,10 @@ export default function ProblemSolvingPage() {
                       ? 'text-[#171717] font-semibold bg-[#fafafa]'
                       : 'text-[#4d4d4d] hover:bg-[#fafafa] hover:text-[#171717]'
                   }`}
-                  onClick={() => { setLang(l); setShowLangMenu(false); }}
+                  onClick={() => {
+                    setLang(l);
+                    setShowLangMenu(false);
+                  }}
                 >
                   {l}
                 </button>
@@ -160,7 +194,6 @@ export default function ProblemSolvingPage() {
 
       {/* ── MAIN WORKSPACE ─────────────────────────────────────────── */}
       <div className="flex-1 flex overflow-hidden">
-
         {/* ── LEFT PANEL — Problem Statement ──────────────────────── */}
         <section
           className="w-[45%] flex-shrink-0 flex flex-col bg-white overflow-y-auto hide-scrollbar"
@@ -176,7 +209,12 @@ export default function ProblemSolvingPage() {
               <button
                 key={tab}
                 className="py-2 text-xs font-medium text-[#666666] hover:text-[#171717] transition-colors duration-150"
-                style={{ borderBottom: tab === 'Description' ? '2px solid #171717' : '2px solid transparent' }}
+                style={{
+                  borderBottom:
+                    tab === 'Description'
+                      ? '2px solid #171717'
+                      : '2px solid transparent',
+                }}
               >
                 {tab}
               </button>
@@ -203,9 +241,7 @@ export default function ProblemSolvingPage() {
             <div className="flex flex-col gap-4">
               {problem.examples.map(({ id, input, output, explanation }) => (
                 <div key={id} id={id}>
-                  <h3
-                    className="text-mono-label text-[#808080] mb-2"
-                  >
+                  <h3 className="text-mono-label text-[#808080] mb-2">
                     {id.replace('ex-', 'Example ')}
                   </h3>
                   <div
@@ -214,7 +250,9 @@ export default function ProblemSolvingPage() {
                   >
                     <div className="p-4 bg-[#fafafa]">
                       <div className="mb-2">
-                        <span className="text-mono-label text-[#808080]">Input:</span>
+                        <span className="text-mono-label text-[#808080]">
+                          Input:
+                        </span>
                         <code
                           className="block font-mono text-[#171717] mt-1"
                           style={{ fontSize: '0.8125rem' }}
@@ -223,7 +261,9 @@ export default function ProblemSolvingPage() {
                         </code>
                       </div>
                       <div className="mb-2">
-                        <span className="text-mono-label text-[#808080]">Output:</span>
+                        <span className="text-mono-label text-[#808080]">
+                          Output:
+                        </span>
                         <code
                           className="block font-mono text-[#0a72ef] mt-1"
                           style={{ fontSize: '0.8125rem' }}
@@ -233,8 +273,13 @@ export default function ProblemSolvingPage() {
                       </div>
                       {explanation && (
                         <div>
-                          <span className="text-mono-label text-[#808080]">Explanation:</span>
-                          <p className="text-[#4d4d4d] mt-1" style={{ fontSize: '0.8125rem' }}>
+                          <span className="text-mono-label text-[#808080]">
+                            Explanation:
+                          </span>
+                          <p
+                            className="text-[#4d4d4d] mt-1"
+                            style={{ fontSize: '0.8125rem' }}
+                          >
                             {explanation}
                           </p>
                         </div>
@@ -247,7 +292,9 @@ export default function ProblemSolvingPage() {
 
             {/* Constraints */}
             <div>
-              <h3 className="text-mono-label text-[#808080] mb-3">Constraints</h3>
+              <h3 className="text-mono-label text-[#808080] mb-3">
+                Constraints
+              </h3>
               <ul className="flex flex-col gap-2">
                 {problem.constraints.map((c, i) => (
                   <li key={i} className="flex items-start gap-2">
@@ -272,15 +319,25 @@ export default function ProblemSolvingPage() {
         </section>
 
         {/* ── RIGHT PANEL — Code Editor ────────────────────────────── */}
-        <section className="flex-1 flex flex-col min-w-0 bg-white" aria-label="Code editor">
-
+        <section
+          className="flex-1 flex flex-col min-w-0 bg-white"
+          aria-label="Code editor"
+        >
           {/* Editor toolbar */}
           <div
             className="flex items-center justify-between px-4 py-2 bg-[#fafafa] flex-shrink-0"
             style={{ borderBottom: '1px solid #ebebeb' }}
           >
-            <div className="flex items-center gap-3 text-[#808080]" style={{ fontSize: '0.75rem' }}>
-              <span className="material-symbols-outlined text-sm" aria-hidden="true">history</span>
+            <div
+              className="flex items-center gap-3 text-[#808080]"
+              style={{ fontSize: '0.75rem' }}
+            >
+              <span
+                className="material-symbols-outlined text-sm"
+                aria-hidden="true"
+              >
+                history
+              </span>
               Auto-saved 2m ago
             </div>
             <div className="flex items-center gap-1">
@@ -289,14 +346,24 @@ export default function ProblemSolvingPage() {
                 className="p-1.5 rounded-standard text-[#808080] hover:text-[#171717] hover:bg-[#ebebeb] transition-colors"
                 aria-label="Editor settings"
               >
-                <span className="material-symbols-outlined text-sm" aria-hidden="true">settings</span>
+                <span
+                  className="material-symbols-outlined text-sm"
+                  aria-hidden="true"
+                >
+                  settings
+                </span>
               </button>
               <button
                 id="editor-fullscreen-btn"
                 className="p-1.5 rounded-standard text-[#808080] hover:text-[#171717] hover:bg-[#ebebeb] transition-colors"
                 aria-label="Fullscreen editor"
               >
-                <span className="material-symbols-outlined text-sm" aria-hidden="true">fullscreen</span>
+                <span
+                  className="material-symbols-outlined text-sm"
+                  aria-hidden="true"
+                >
+                  fullscreen
+                </span>
               </button>
             </div>
           </div>
@@ -305,13 +372,22 @@ export default function ProblemSolvingPage() {
           <div className="flex-1 overflow-hidden">
             <Editor
               height="100%"
-              language={lang === 'Python' ? 'python' : lang === 'JavaScript' ? 'javascript' : lang === 'C++' ? 'cpp' : lang === 'Java' ? 'java' : 'go'}
+              language={
+                lang === 'Python'
+                  ? 'python'
+                  : lang === 'C++'
+                    ? 'cpp'
+                    : lang === 'Java'
+                      ? 'java'
+                      : 'go'
+              }
               value={code}
               onChange={(val) => setCode(val ?? '')}
               theme="vs"
               options={{
                 fontSize: 14,
-                fontFamily: "'Geist Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace",
+                fontFamily:
+                  "'Geist Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace",
                 fontLigatures: true,
                 lineNumbers: 'on',
                 minimap: { enabled: false },
@@ -347,13 +423,19 @@ export default function ProblemSolvingPage() {
                   id={`panel-tab-${panel}`}
                   className="h-full flex items-center gap-1.5 text-xs font-medium transition-colors duration-150"
                   style={{
-                    borderBottom: activePanel === panel ? '2px solid #171717' : '2px solid transparent',
+                    borderBottom:
+                      activePanel === panel
+                        ? '2px solid #171717'
+                        : '2px solid transparent',
                     color: activePanel === panel ? '#171717' : '#808080',
                     textTransform: 'capitalize',
                   }}
                   onClick={() => setActivePanel(panel)}
                 >
-                  <span className="material-symbols-outlined text-sm" aria-hidden="true">
+                  <span
+                    className="material-symbols-outlined text-sm"
+                    aria-hidden="true"
+                  >
                     {panel === 'console' ? 'terminal' : 'rule'}
                   </span>
                   {panel === 'console' ? 'Console' : 'Test Cases'}
@@ -371,13 +453,21 @@ export default function ProblemSolvingPage() {
             </div>
 
             {/* Panel content */}
-            <div className="p-4 font-mono overflow-y-auto hide-scrollbar" style={{ height: 'calc(180px - 2.5rem)', fontSize: '0.8125rem' }}>
+            <div
+              className="p-4 font-mono overflow-y-auto hide-scrollbar"
+              style={{ height: 'calc(180px - 2.5rem)', fontSize: '0.8125rem' }}
+            >
               {activePanel === 'console' ? (
                 <div className="text-[#808080] flex flex-col gap-1">
-                  <p>{'>'} Ready to execute <span className="text-[#0a72ef]">solution.py</span>…</p>
+                  <p>
+                    {'>'} Ready to execute{' '}
+                    <span className="text-[#0a72ef]">solution.py</span>…
+                  </p>
                   <p>{'>'} Waiting for input…</p>
                   {!isRunning && (
-                    <p className="text-[#808080] opacity-60 mt-1">Press "Run Code" to execute against test cases.</p>
+                    <p className="text-[#808080] opacity-60 mt-1">
+                      Press "Run Code" to execute against test cases.
+                    </p>
                   )}
                 </div>
               ) : (
@@ -387,14 +477,18 @@ export default function ProblemSolvingPage() {
                     style={{ boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.06)' }}
                   >
                     <p className="text-[#808080] mb-1">Input:</p>
-                    <code className="text-[#171717]">root = [3, 9, 20, null, null, 15, 7]</code>
+                    <code className="text-[#171717]">
+                      root = [3, 9, 20, null, null, 15, 7]
+                    </code>
                   </div>
                   <div
                     className="p-3 rounded-standard bg-[#fafafa]"
                     style={{ boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.06)' }}
                   >
                     <p className="text-[#808080] mb-1">Expected Output:</p>
-                    <code className="text-[#0a72ef]">[[3], [9, 20], [15, 7]]</code>
+                    <code className="text-[#0a72ef]">
+                      [[3], [9, 20], [15, 7]]
+                    </code>
                   </div>
                 </div>
               )}
@@ -406,7 +500,10 @@ export default function ProblemSolvingPage() {
       {/* ── BOTTOM ACTION BAR ──────────────────────────────────────── */}
       <footer
         className="flex items-center justify-between px-6 h-14 bg-white flex-shrink-0"
-        style={{ boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.08), 0px -2px 4px rgba(0,0,0,0.04)' }}
+        style={{
+          boxShadow:
+            '0px 0px 0px 1px rgba(0,0,0,0.08), 0px -2px 4px rgba(0,0,0,0.04)',
+        }}
       >
         <div className="flex items-center gap-4">
           <button
@@ -414,11 +511,19 @@ export default function ProblemSolvingPage() {
             className="flex items-center gap-2 text-[#666666] hover:text-[#171717] transition-colors duration-150"
             style={{ fontSize: '0.8125rem', fontWeight: '500' }}
           >
-            <span className="material-symbols-outlined text-sm" aria-hidden="true">lightbulb</span>
+            <span
+              className="material-symbols-outlined text-sm"
+              aria-hidden="true"
+            >
+              lightbulb
+            </span>
             Show Hint
           </button>
           <div className="h-4 w-px bg-[#ebebeb]" aria-hidden="true" />
-          <div className="flex items-center gap-3 font-mono text-[#808080]" style={{ fontSize: '0.75rem' }}>
+          <div
+            className="flex items-center gap-3 font-mono text-[#808080]"
+            style={{ fontSize: '0.75rem' }}
+          >
             <span>Memory: 0 MB</span>
             <span>Runtime: 0 ms</span>
           </div>
@@ -433,12 +538,22 @@ export default function ProblemSolvingPage() {
           >
             {isRunning ? (
               <>
-                <span className="material-symbols-outlined text-sm animate-spin" aria-hidden="true">progress_activity</span>
+                <span
+                  className="material-symbols-outlined text-sm animate-spin"
+                  aria-hidden="true"
+                >
+                  progress_activity
+                </span>
                 Running…
               </>
             ) : (
               <>
-                <span className="material-symbols-outlined text-sm" aria-hidden="true">play_arrow</span>
+                <span
+                  className="material-symbols-outlined text-sm"
+                  aria-hidden="true"
+                >
+                  play_arrow
+                </span>
                 Run Code
               </>
             )}
@@ -449,7 +564,12 @@ export default function ProblemSolvingPage() {
             style={{ background: '#ff5b4f' }}
             onClick={handleSubmit}
           >
-            <span className="material-symbols-outlined text-sm" aria-hidden="true">upload</span>
+            <span
+              className="material-symbols-outlined text-sm"
+              aria-hidden="true"
+            >
+              upload
+            </span>
             Submit Solution
           </button>
         </div>
