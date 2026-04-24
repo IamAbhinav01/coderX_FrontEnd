@@ -72,6 +72,7 @@ export default function ProblemSolvingPage() {
   const navigate = useNavigate();
   const [lang, setLang] = useState('Python');
   const [code, setCode] = useState('');
+
   const [activePanel, setActivePanel] = useState<'console' | 'testcases'>(
     'console'
   );
@@ -86,11 +87,21 @@ export default function ProblemSolvingPage() {
     }, 1500);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     try {
       // navigate('/feedback');
       console.log(code);
       console.log(lang);
+      const response = await axios.post(
+        'http://localhost:3000/api/v1/submissions',
+        {
+          code,
+          language: lang,
+          userId: '1',
+          problemId: '',
+        }
+      );
+      console.log(response);
       // const response = await axios.post();
     } catch (e) {
       console.log(e);
