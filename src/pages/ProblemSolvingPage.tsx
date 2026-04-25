@@ -29,49 +29,47 @@ const problem = {
     'The number of nodes is in the range [0, 2000].',
     '-1000 ≤ Node.val ≤ 1000',
   ],
+  codeSnippets: [
+    {
+      language: 'Python',
+      startSnippet:
+        'from collections import deque\nfrom typing import Optional, List\n\n# Definition for a binary tree node.\nclass TreeNode:\n    def __init__(self, val=0, left=None, right=None):\n        self.val = val\n        self.left = left\n        self.right = right\n\nclass Solution:\n    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:',
+      midSnippet: '        # Write your logic here\n        pass',
+      endSnippet:
+        '# Hidden driver code for evaluating python submission\nif __name__ == "__main__":\n    pass',
+    },
+    {
+      language: 'CPP',
+      startSnippet:
+        '#include <bits/stdc++.h>\nusing namespace std;\n\n// Definition for a binary tree node.\nstruct TreeNode {\n    int val;\n    TreeNode *left;\n    TreeNode *right;\n    TreeNode() : val(0), left(nullptr), right(nullptr) {}\n    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n    TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n};\n\nclass Solution {\npublic:\n    vector<vector<int>> levelOrder(TreeNode* root) {',
+      midSnippet: '        // Write your logic here\n        return {};',
+      endSnippet:
+        '    }\n};\n\nint main() {\n    // Hidden driver code\n    return 0;\n}',
+    },
+    {
+      language: 'Java',
+      startSnippet:
+        'import java.util.*;\n\n// Definition for a binary tree node.\nclass TreeNode {\n    int val;\n    TreeNode left;\n    TreeNode right;\n    TreeNode() {}\n    TreeNode(int val) { this.val = val; }\n    TreeNode(int val, TreeNode left, TreeNode right) {\n        this.val = val;\n        this.left = left;\n        this.right = right;\n    }\n}\n\nclass Solution {\n    public List<List<Integer>> levelOrder(TreeNode root) {',
+      midSnippet:
+        '        // Write your logic here\n        return new ArrayList<>();',
+      endSnippet:
+        '    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        // Hidden driver code\n    }\n}',
+    },
+  ],
 };
 
-const STARTER_CODE = `from collections import deque
-from typing import Optional, List
-
-# Definition for a binary tree node.
-class TreeNode:
-    def __init__(self, val=0, left=None, right=None):
-        self.val = val
-        self.left = left
-        self.right = right
-
-class Solution:
-    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:
-        if not root:
-            return []
-
-        result = []
-        queue = deque([root])
-
-        while queue:
-            level_size = len(queue)
-            level = []
-
-            for _ in range(level_size):
-                node = queue.popleft()
-                level.append(node.val)
-                if node.left:
-                    queue.append(node.left)
-                if node.right:
-                    queue.append(node.right)
-
-            result.append(level)
-
-        return result
-`;
-
-const langOptions = ['Python', 'C++', 'Java'];
+const langOptions = ['Python', 'CPP', 'Java'];
 
 export default function ProblemSolvingPage() {
   const navigate = useNavigate();
   const [lang, setLang] = useState('Python');
-  const [code, setCode] = useState('');
+
+  const getInitialCode = (language: string) => {
+    const snippet = problem.codeSnippets.find((s) => s.language === language);
+    return snippet ? snippet.midSnippet : '';
+  };
+
+  const [code, setCode] = useState(() => getInitialCode('Python'));
 
   const [activePanel, setActivePanel] = useState<'console' | 'testcases'>(
     'console'
@@ -89,16 +87,18 @@ export default function ProblemSolvingPage() {
 
   const handleSubmit = async () => {
     try {
-      // navigate('/feedback');
-      console.log(code);
-      console.log(lang);
+      const fullCode = code;
+
+      console.log('Submitting Code:\n', fullCode);
+      console.log('Language:', lang);
+
       const response = await axios.post(
-        'http://localhost:3000/api/v1/submissions',
+        'http://localhost:3001/api/v1/submissions',
         {
-          code,
+          code: fullCode,
           language: lang,
           userId: '1',
-          problemId: '',
+          problemId: '69ec6db19f4c8591447ccc67',
         }
       );
       console.log(response);
@@ -192,6 +192,7 @@ export default function ProblemSolvingPage() {
                   }`}
                   onClick={() => {
                     setLang(l);
+                    setCode(getInitialCode(l));
                     setShowLangMenu(false);
                   }}
                 >
