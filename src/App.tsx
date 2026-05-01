@@ -9,7 +9,7 @@ import AIFeedbackPage from './pages/AIFeedbackPage';
 function App() {
   return (
     <BrowserRouter>
-      {/* Top navigation — hidden on the problem solving page to maximize editor space */}
+      {}
       <Routes>
         <Route
           path="/problem/:id"

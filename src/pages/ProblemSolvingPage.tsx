@@ -1,589 +1,323 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
+import { io } from 'socket.io-client';
 
-/* ─── Problem data ─────────────────────────────────────────────────── */
-const problem = {
-  id: 'binary-tree-level-order',
-  title: 'Binary Tree Level Order Traversal',
-  difficulty: 'Medium',
-  difficultyColor: '#de1d8d',
-  topic: 'Trees',
-  description: `Given the <code>root</code> of a binary tree, return the <strong>level order traversal</strong> of its nodes' values (i.e., from left to right, level by level).`,
-  examples: [
-    {
-      id: 'ex-1',
-      input: 'root = [3, 9, 20, null, null, 15, 7]',
-      output: '[[3], [9, 20], [15, 7]]',
-      explanation: 'Three levels: root, then left/right, then their children.',
-    },
-    {
-      id: 'ex-2',
-      input: 'root = [1]',
-      output: '[[1]]',
-      explanation: 'Single node, one level.',
-    },
-  ],
-  constraints: [
-    'The number of nodes is in the range [0, 2000].',
-    '-1000 ≤ Node.val ≤ 1000',
-  ],
-  codeSnippets: [
-    {
-      language: 'Python',
-      startSnippet:
-        'from collections import deque\nfrom typing import Optional, List\n\n# Definition for a binary tree node.\nclass TreeNode:\n    def __init__(self, val=0, left=None, right=None):\n        self.val = val\n        self.left = left\n        self.right = right\n\nclass Solution:\n    def levelOrder(self, root: Optional[TreeNode]) -> List[List[int]]:',
-      midSnippet: '        # Write your logic here\n        pass',
-      endSnippet:
-        '# Hidden driver code for evaluating python submission\nif __name__ == "__main__":\n    pass',
-    },
-    {
-      language: 'CPP',
-      startSnippet:
-        '#include <bits/stdc++.h>\nusing namespace std;\n\n// Definition for a binary tree node.\nstruct TreeNode {\n    int val;\n    TreeNode *left;\n    TreeNode *right;\n    TreeNode() : val(0), left(nullptr), right(nullptr) {}\n    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}\n    TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}\n};\n\nclass Solution {\npublic:\n    vector<vector<int>> levelOrder(TreeNode* root) {',
-      midSnippet: '        // Write your logic here\n        return {};',
-      endSnippet:
-        '    }\n};\n\nint main() {\n    // Hidden driver code\n    return 0;\n}',
-    },
-    {
-      language: 'Java',
-      startSnippet:
-        'import java.util.*;\n\n// Definition for a binary tree node.\nclass TreeNode {\n    int val;\n    TreeNode left;\n    TreeNode right;\n    TreeNode() {}\n    TreeNode(int val) { this.val = val; }\n    TreeNode(int val, TreeNode left, TreeNode right) {\n        this.val = val;\n        this.left = left;\n        this.right = right;\n    }\n}\n\nclass Solution {\n    public List<List<Integer>> levelOrder(TreeNode root) {',
-      midSnippet:
-        '        // Write your logic here\n        return new ArrayList<>();',
-      endSnippet:
-        '    }\n}\n\npublic class Main {\n    public static void main(String[] args) {\n        // Hidden driver code\n    }\n}',
-    },
-  ],
+interface CodeSnippet {
+  language: string;
+  startSnippet: string;
+  midSnippet: string;
+  endSnippet: string;
+}
+
+interface Example {
+  id: string;
+  input: string;
+  output: string;
+  explanation: string;
+}
+
+interface Problem {
+  id: string;
+  title: string;
+  difficulty: string;
+  difficultyColor: string;
+  topic: string;
+  description: string;
+  examples: Example[];
+  constraints: string[];
+  codeSnippets: CodeSnippet[];
+}
+
+const difficultyColors: Record<string, string> = {
+  easy: '#00FF88',
+  medium: '#de1d8d',
+  hard: '#ff5b4f',
 };
 
 const langOptions = ['Python', 'CPP', 'Java'];
 
 export default function ProblemSolvingPage() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
+  const [problem, setProblem] = useState<Problem | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
   const [lang, setLang] = useState('Python');
-
-  const getInitialCode = (language: string) => {
-    const snippet = problem.codeSnippets.find((s) => s.language === language);
-    return snippet ? snippet.midSnippet : '';
-  };
-
-  const [code, setCode] = useState(() => getInitialCode('Python'));
+  
+  const [startSnippet, setStartSnippet] = useState('');
+  const [midCode, setMidCode] = useState('');
+  const [endSnippet, setEndSnippet] = useState('');
 
   const [activePanel, setActivePanel] = useState<'console' | 'testcases'>(
     'console'
   );
+  const activePanelRef = useRef(activePanel);
+  useEffect(() => {
+    activePanelRef.current = activePanel;
+  }, [activePanel]);
+
   const [isRunning, setIsRunning] = useState(false);
   const [showLangMenu, setShowLangMenu] = useState(false);
+  const [consoleOutput, setConsoleOutput] = useState<string[]>([]);
 
-  const handleRun = () => {
-    setIsRunning(true);
-    setTimeout(() => {
+  useEffect(() => {
+    const socket = io('http://localhost:3000');
+    
+    socket.on('connect', () => {
+      socket.emit('setUserId', '1');
+    });
+
+    socket.on('foo', (data: any) => {
       setIsRunning(false);
-      setActivePanel('console');
-    }, 1500);
+      
+      let result = data;
+      let testCaseResults = null;
+
+      if (data && data.response) {
+          if (Array.isArray(data.response.results)) {
+              testCaseResults = data.response.results;
+          } else if (Array.isArray(data.response)) {
+              testCaseResults = data.response;
+          }
+      } else if (typeof data === 'object') {
+          const keys = Object.keys(data);
+          if (keys.length > 0 && data[keys[0]].response) {
+              const inner = data[keys[0]];
+              if (Array.isArray(inner.response.results)) {
+                  testCaseResults = inner.response.results;
+                  result = inner;
+              } else if (Array.isArray(inner.response)) {
+                  testCaseResults = inner.response;
+                  result = inner;
+              }
+          }
+      }
+
+      if (testCaseResults && Array.isArray(testCaseResults)) {
+          if (activePanelRef.current === 'console') {
+              const miniResults = testCaseResults.slice(0, 2).map((res: any, i: number) => 
+                `Test Case ${i+1}: ${res.status} | Output: ${res.actualOutput || res.output || 'No output'}`
+              );
+              setConsoleOutput(miniResults);
+          } else {
+              navigate('/feedback', { state: { submissionResult: { ...result, response: testCaseResults } } });
+          }
+      } else {
+          if (activePanelRef.current === 'console') {
+              setConsoleOutput(['Error: Received malformed data from judge engine.']);
+          }
+      }
+    });
+
+    const fetchProblem = async () => {
+      if (!id) return;
+      try {
+        setLoading(true);
+        const response = await axios.get(`http://localhost:4000/api/v1/problems/${id}`);
+        const data = response.data.data;
+        if (!data) throw new Error('Problem not found');
+
+        const mappedProblem: Problem = {
+          id: data._id,
+          title: data.title || 'Untitled Problem',
+          difficulty: data.difficulty ? data.difficulty.charAt(0).toUpperCase() + data.difficulty.slice(1).toLowerCase() : 'Easy',
+          difficultyColor: difficultyColors[(data.difficulty || 'easy').toLowerCase()] || '#de1d8d',
+          topic: data.topic || 'General',
+          description: data.description || 'No description provided.',
+          examples: (data.testCases || []).slice(0, 2).map((tc: any, i: number) => ({
+            id: `ex-${i + 1}`,
+            input: tc.input || '',
+            output: tc.output || '',
+            explanation: '',
+          })),
+          constraints: data.constraints || [],
+          codeSnippets: (data.codeSnippets || []).map((stub: any) => ({
+            language: stub.language.toLowerCase() === 'cpp' ? 'CPP' : stub.language.charAt(0).toUpperCase() + stub.language.slice(1).toLowerCase(),
+            startSnippet: stub.startSnippet || '',
+            midSnippet: stub.midSnippet || '    # Write your logic here\n    pass',
+            endSnippet: stub.endSnippet || '',
+          })),
+        };
+
+        setProblem(mappedProblem);
+        
+        const defaultSnippet = mappedProblem.codeSnippets.find(s => s.language === 'Python') || mappedProblem.codeSnippets[0];
+        
+        if (defaultSnippet) {
+          setLang(defaultSnippet.language);
+          setStartSnippet(defaultSnippet.startSnippet);
+          setMidCode(defaultSnippet.midSnippet);
+          setEndSnippet(defaultSnippet.endSnippet);
+        }
+      } catch (err) {
+        setError('Failed to load problem.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProblem();
+    return () => { socket.disconnect(); };
+  }, [id, navigate]);
+
+  const handleLangChange = (newLang: string) => {
+    if (!problem) return;
+    const snippet = problem.codeSnippets.find(s => s.language === newLang);
+    if (snippet) {
+      setLang(newLang);
+      setStartSnippet(snippet.startSnippet);
+      setMidCode(snippet.midSnippet);
+      setEndSnippet(snippet.endSnippet);
+    }
+    setShowLangMenu(false);
   };
 
-  const handleSubmit = async () => {
+  const handleRun = async () => {
+    if (!id || !problem) return;
     try {
-      const fullCode = code;
-
-      console.log('Submitting Code:\n', fullCode);
-      console.log('Language:', lang);
-
-      const response = await axios.post(
-        'http://localhost:3001/api/v1/submissions',
-        {
-          code: fullCode,
-          language: lang,
-          userId: '1',
-          problemId: '69ec6db19f4c8591447ccc67',
-        }
-      );
-      console.log(response);
-      // const response = await axios.post();
+      setIsRunning(true);
+      setActivePanel('console');
+      setConsoleOutput(['Executing...']);
+      await axios.post('http://localhost:3001/api/v1/submissions', {
+        code: midCode, 
+        language: lang.toLowerCase() === 'cpp' ? 'cpp' : lang.toLowerCase(),
+        userId: '1',
+        problemId: id,
+      });
     } catch (e) {
-      console.log(e);
+      setConsoleOutput(['Execution failed.']);
+      setIsRunning(false);
     }
   };
 
+  const handleSubmit = async () => {
+    if (!id || !problem) return;
+    try {
+      setIsRunning(true);
+      setActivePanel('testcases');
+      await axios.post('http://localhost:3001/api/v1/submissions', {
+        code: midCode,
+        language: lang.toLowerCase() === 'cpp' ? 'cpp' : lang.toLowerCase(),
+        userId: '1',
+        problemId: id,
+      });
+    } catch (e) {
+      setIsRunning(false);
+    }
+  };
+
+  if (loading) return <div className="h-screen flex items-center justify-center bg-white"><span className="material-symbols-outlined text-4xl animate-spin text-[#0a72ef]">progress_activity</span></div>;
+  if (error || !problem) return <div className="h-screen flex items-center justify-center bg-white"><h2 className="text-xl font-semibold text-[#171717]">{error}</h2></div>;
+
   return (
     <div className="bg-white h-[calc(100vh-3.5rem)] flex flex-col overflow-hidden">
-      {/* ── EDITOR HEADER BAR ──────────────────────────────────────── */}
-      <div
-        className="flex items-center justify-between px-4 py-2 bg-white flex-shrink-0"
-        style={{ boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.08)' }}
-      >
-        {/* Problem title + difficulty */}
-        <div className="flex items-center gap-3 min-w-0">
-          <div
-            className="h-5 w-px bg-[#ebebeb] flex-shrink-0"
-            aria-hidden="true"
-          />
-          <div className="min-w-0">
-            <h1
-              className="font-sans font-semibold text-[#171717] truncate"
-              style={{ fontSize: '0.875rem', letterSpacing: '-0.02em' }}
-            >
-              {problem.title}
-            </h1>
+      <div className="flex items-center justify-between px-4 py-2 bg-white flex-shrink-0" style={{ boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.08)' }}>
+        <div className="flex items-center gap-3">
+          <div className="h-5 w-px bg-[#ebebeb]" />
+          <div>
+            <h1 className="font-sans font-semibold text-[#171717]" style={{ fontSize: '0.875rem' }}>{problem.title}</h1>
             <div className="flex items-center gap-2 mt-0.5">
-              <span
-                className="text-mono-label px-1.5 py-0.5 rounded-micro"
-                style={{
-                  fontSize: '10px',
-                  color: problem.difficultyColor,
-                  background: `${problem.difficultyColor}18`,
-                }}
-              >
-                {problem.difficulty}
-              </span>
-              <span className="text-[#808080]" style={{ fontSize: '11px' }}>
-                {problem.topic}
-              </span>
+              <span className="text-mono-label px-1.5 py-0.5 rounded" style={{ fontSize: '10px', color: problem.difficultyColor, background: `${problem.difficultyColor}18` }}>{problem.difficulty}</span>
+              <span className="text-[#808080] text-[11px]">{problem.topic}</span>
             </div>
           </div>
         </div>
 
-        {/* Language selector */}
         <div className="relative">
-          <button
-            id="lang-selector-btn"
-            className="flex items-center gap-1.5 btn-ghost py-1.5 px-3"
-            onClick={() => setShowLangMenu(!showLangMenu)}
-            aria-haspopup="listbox"
-            aria-expanded={showLangMenu}
-          >
-            <span
-              className="material-symbols-outlined text-sm"
-              aria-hidden="true"
-            >
-              code
-            </span>
+          <button className="flex items-center gap-1.5 btn-ghost py-1.5 px-3" onClick={() => setShowLangMenu(!showLangMenu)}>
+            <span className="material-symbols-outlined text-sm">code</span>
             <span style={{ fontSize: '0.8125rem' }}>{lang}</span>
-            <span
-              className="material-symbols-outlined text-sm"
-              aria-hidden="true"
-            >
-              expand_more
-            </span>
+            <span className="material-symbols-outlined text-sm">expand_more</span>
           </button>
-
           {showLangMenu && (
-            <div
-              id="lang-dropdown"
-              role="listbox"
-              className="absolute right-0 top-full mt-1 bg-white rounded-card py-1 z-10 min-w-[130px]"
-              style={{
-                boxShadow:
-                  '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 4px 8px rgba(0,0,0,0.08)',
-              }}
-            >
-              {langOptions.map((l) => (
-                <button
-                  key={l}
-                  role="option"
-                  aria-selected={l === lang}
-                  className={`w-full text-left px-3 py-2 text-sm transition-colors duration-100 ${
-                    l === lang
-                      ? 'text-[#171717] font-semibold bg-[#fafafa]'
-                      : 'text-[#4d4d4d] hover:bg-[#fafafa] hover:text-[#171717]'
-                  }`}
-                  onClick={() => {
-                    setLang(l);
-                    setCode(getInitialCode(l));
-                    setShowLangMenu(false);
-                  }}
-                >
-                  {l}
-                </button>
+            <div className="absolute right-0 top-full mt-1 bg-white rounded-card py-1 z-10 min-w-[130px]" style={{ boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.08), 0px 4px 8px rgba(0,0,0,0.08)' }}>
+              {langOptions.map(l => (
+                <button key={l} className={`w-full text-left px-3 py-2 text-sm ${l === lang ? 'text-[#171717] font-semibold bg-[#fafafa]' : 'text-[#4d4d4d] hover:bg-[#fafafa]'}`} onClick={() => handleLangChange(l)}>{l}</button>
               ))}
             </div>
           )}
         </div>
       </div>
 
-      {/* ── MAIN WORKSPACE ─────────────────────────────────────────── */}
       <div className="flex-1 flex overflow-hidden">
-        {/* ── LEFT PANEL — Problem Statement ──────────────────────── */}
-        <section
-          className="w-[45%] flex-shrink-0 flex flex-col bg-white overflow-y-auto hide-scrollbar"
-          style={{ borderRight: '1px solid #ebebeb' }}
-          aria-label="Problem statement"
-        >
-          {/* Tabs */}
-          <div
-            className="flex items-center gap-4 px-6 py-2 flex-shrink-0"
-            style={{ borderBottom: '1px solid #ebebeb' }}
-          >
-            {['Description', 'Examples', 'Constraints'].map((tab) => (
-              <button
-                key={tab}
-                className="py-2 text-xs font-medium text-[#666666] hover:text-[#171717] transition-colors duration-150"
-                style={{
-                  borderBottom:
-                    tab === 'Description'
-                      ? '2px solid #171717'
-                      : '2px solid transparent',
-                }}
-              >
-                {tab}
-              </button>
-            ))}
+        <section className="w-[45%] flex-shrink-0 flex flex-col bg-white overflow-y-auto border-r border-[#ebebeb]">
+          <div className="flex items-center gap-4 px-6 py-2 border-b border-[#ebebeb]">
+            <button className="py-2 text-xs font-medium text-[#171717] border-b-2 border-[#171717]">Description</button>
           </div>
-
-          <div className="px-6 py-6 flex flex-col gap-8">
-            {/* Description */}
-            <div>
-              <h2
-                className="font-sans font-semibold text-[#171717] mb-3"
-                style={{ fontSize: '1rem', letterSpacing: '-0.02em' }}
-              >
-                Problem Statement
-              </h2>
-              <p
-                className="text-[#4d4d4d]"
-                style={{ fontSize: '0.9rem', lineHeight: '1.7' }}
-                dangerouslySetInnerHTML={{ __html: problem.description }}
-              />
-            </div>
-
-            {/* Examples */}
+          <div className="px-6 py-6 flex flex-col gap-6">
+            <div className="text-[#4d4d4d] text-sm leading-relaxed" dangerouslySetInnerHTML={{ __html: problem.description }} />
             <div className="flex flex-col gap-4">
-              {problem.examples.map(({ id, input, output, explanation }) => (
-                <div key={id} id={id}>
-                  <h3 className="text-mono-label text-[#808080] mb-2">
-                    {id.replace('ex-', 'Example ')}
-                  </h3>
-                  <div
-                    className="rounded-card overflow-hidden"
-                    style={{ boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.08)' }}
-                  >
-                    <div className="p-4 bg-[#fafafa]">
-                      <div className="mb-2">
-                        <span className="text-mono-label text-[#808080]">
-                          Input:
-                        </span>
-                        <code
-                          className="block font-mono text-[#171717] mt-1"
-                          style={{ fontSize: '0.8125rem' }}
-                        >
-                          {input}
-                        </code>
-                      </div>
-                      <div className="mb-2">
-                        <span className="text-mono-label text-[#808080]">
-                          Output:
-                        </span>
-                        <code
-                          className="block font-mono text-[#0a72ef] mt-1"
-                          style={{ fontSize: '0.8125rem' }}
-                        >
-                          {output}
-                        </code>
-                      </div>
-                      {explanation && (
-                        <div>
-                          <span className="text-mono-label text-[#808080]">
-                            Explanation:
-                          </span>
-                          <p
-                            className="text-[#4d4d4d] mt-1"
-                            style={{ fontSize: '0.8125rem' }}
-                          >
-                            {explanation}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+              {problem.examples.map(ex => (
+                <div key={ex.id} className="rounded-card bg-[#fafafa] p-4 border border-[#ebebeb]">
+                  <p className="text-mono-label text-[#808080] mb-2">{ex.id.replace('ex-', 'Case ')}</p>
+                  <code className="text-[#171717] block mb-1 font-mono text-xs">Input: {ex.input}</code>
+                  <code className="text-[#0a72ef] block font-mono text-xs">Output: {ex.output}</code>
                 </div>
               ))}
-            </div>
-
-            {/* Constraints */}
-            <div>
-              <h3 className="text-mono-label text-[#808080] mb-3">
-                Constraints
-              </h3>
-              <ul className="flex flex-col gap-2">
-                {problem.constraints.map((c, i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <span
-                      className="material-symbols-outlined text-sm text-[#0a72ef] mt-0.5 flex-shrink-0"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                      aria-hidden="true"
-                    >
-                      check_circle
-                    </span>
-                    <code
-                      className="font-mono text-[#4d4d4d]"
-                      style={{ fontSize: '0.8125rem', lineHeight: '1.6' }}
-                    >
-                      {c}
-                    </code>
-                  </li>
-                ))}
-              </ul>
             </div>
           </div>
         </section>
 
-        {/* ── RIGHT PANEL — Code Editor ────────────────────────────── */}
-        <section
-          className="flex-1 flex flex-col min-w-0 bg-white"
-          aria-label="Code editor"
-        >
-          {/* Editor toolbar */}
-          <div
-            className="flex items-center justify-between px-4 py-2 bg-[#fafafa] flex-shrink-0"
-            style={{ borderBottom: '1px solid #ebebeb' }}
-          >
-            <div
-              className="flex items-center gap-3 text-[#808080]"
-              style={{ fontSize: '0.75rem' }}
-            >
-              <span
-                className="material-symbols-outlined text-sm"
-                aria-hidden="true"
-              >
-                history
-              </span>
-              Auto-saved 2m ago
+        <section className="flex-1 flex flex-col min-w-0 bg-[#fafafa]">
+          <div className="flex-1 flex flex-col overflow-hidden p-2">
+            <div className="flex-shrink-0 opacity-60 pointer-events-none select-none">
+              <Editor 
+                height={`${Math.max(startSnippet.split('\n').length * 20, 40)}px`}
+                language={lang.toLowerCase() === 'cpp' ? 'cpp' : lang.toLowerCase()} 
+                value={startSnippet} 
+                options={{ fontSize: 13, minimap: { enabled: false }, readOnly: true, lineNumbers: 'on', scrollbar: { vertical: 'hidden' }, lineDecorationsWidth: 0, folding: false }} 
+              />
             </div>
-            <div className="flex items-center gap-1">
-              <button
-                id="editor-settings-btn"
-                className="p-1.5 rounded-standard text-[#808080] hover:text-[#171717] hover:bg-[#ebebeb] transition-colors"
-                aria-label="Editor settings"
-              >
-                <span
-                  className="material-symbols-outlined text-sm"
-                  aria-hidden="true"
-                >
-                  settings
-                </span>
-              </button>
-              <button
-                id="editor-fullscreen-btn"
-                className="p-1.5 rounded-standard text-[#808080] hover:text-[#171717] hover:bg-[#ebebeb] transition-colors"
-                aria-label="Fullscreen editor"
-              >
-                <span
-                  className="material-symbols-outlined text-sm"
-                  aria-hidden="true"
-                >
-                  fullscreen
-                </span>
-              </button>
+
+            <div className="flex-1 border-y border-[#ebebeb] bg-white" style={{ boxShadow: 'inset 0 0 10px rgba(0,0,0,0.02)' }}>
+              <Editor 
+                height="100%" 
+                language={lang.toLowerCase() === 'cpp' ? 'cpp' : lang.toLowerCase()} 
+                value={midCode} 
+                onChange={v => setMidCode(v || '')} 
+                options={{ fontSize: 14, minimap: { enabled: false }, lineNumbers: 'on', scrollBeyondLastLine: false, padding: { top: 10 } }} 
+              />
+            </div>
+
+            <div className="flex-shrink-0 opacity-60 pointer-events-none select-none">
+              <Editor 
+                height={`${Math.max(endSnippet.split('\n').length * 20, 40)}px`}
+                language={lang.toLowerCase() === 'cpp' ? 'cpp' : lang.toLowerCase()} 
+                value={endSnippet} 
+                options={{ fontSize: 13, minimap: { enabled: false }, readOnly: true, lineNumbers: 'on', scrollbar: { vertical: 'hidden' }, lineDecorationsWidth: 0, folding: false }} 
+              />
             </div>
           </div>
 
-          {/* Monaco Editor */}
-          <div className="flex-1 overflow-hidden">
-            <Editor
-              height="100%"
-              language={
-                lang === 'Python'
-                  ? 'python'
-                  : lang === 'C++'
-                    ? 'cpp'
-                    : lang === 'Java'
-                      ? 'java'
-                      : 'go'
-              }
-              value={code}
-              onChange={(val) => setCode(val ?? '')}
-              theme="vs"
-              options={{
-                fontSize: 14,
-                fontFamily:
-                  "'Geist Mono', 'Fira Code', 'Cascadia Code', ui-monospace, monospace",
-                fontLigatures: true,
-                lineNumbers: 'on',
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                padding: { top: 16, bottom: 16 },
-                renderLineHighlight: 'line',
-                lineHeight: 1.6,
-                tabSize: 4,
-                wordWrap: 'on',
-                smoothScrolling: true,
-                cursorBlinking: 'smooth',
-                cursorSmoothCaretAnimation: 'on',
-              }}
-            />
-          </div>
-
-          {/* Console / Test Cases panel */}
-          <div
-            className="flex-shrink-0 bg-white"
-            style={{
-              height: '180px',
-              borderTop: '1px solid #ebebeb',
-            }}
-          >
-            {/* Tabs */}
-            <div
-              className="flex items-center px-4 h-10 gap-4 bg-[#fafafa]"
-              style={{ borderBottom: '1px solid #ebebeb' }}
-            >
-              {(['console', 'testcases'] as const).map((panel) => (
-                <button
-                  key={panel}
-                  id={`panel-tab-${panel}`}
-                  className="h-full flex items-center gap-1.5 text-xs font-medium transition-colors duration-150"
-                  style={{
-                    borderBottom:
-                      activePanel === panel
-                        ? '2px solid #171717'
-                        : '2px solid transparent',
-                    color: activePanel === panel ? '#171717' : '#808080',
-                    textTransform: 'capitalize',
-                  }}
-                  onClick={() => setActivePanel(panel)}
-                >
-                  <span
-                    className="material-symbols-outlined text-sm"
-                    aria-hidden="true"
-                  >
-                    {panel === 'console' ? 'terminal' : 'rule'}
-                  </span>
-                  {panel === 'console' ? 'Console' : 'Test Cases'}
-                </button>
+          <div className="flex-shrink-0 bg-white border-t border-[#ebebeb]" style={{ height: '180px' }}>
+            <div className="flex items-center px-4 h-10 gap-4 bg-[#fafafa] border-b border-[#ebebeb]">
+              {(['console', 'testcases'] as const).map(panel => (
+                <button key={panel} className={`h-full px-2 text-xs font-medium ${activePanel === panel ? 'text-[#171717] border-b-2 border-[#171717]' : 'text-[#808080]'}`} onClick={() => setActivePanel(panel)}>{panel.toUpperCase()}</button>
               ))}
-
-              {isRunning && (
-                <span
-                  className="ml-auto text-mono-label animate-pulse"
-                  style={{ color: '#de1d8d', fontSize: '10px' }}
-                >
-                  Running…
-                </span>
-              )}
+              {isRunning && <span className="ml-auto text-mono-label animate-pulse text-[#de1d8d] text-[10px]">Processing…</span>}
             </div>
-
-            {/* Panel content */}
-            <div
-              className="p-4 font-mono overflow-y-auto hide-scrollbar"
-              style={{ height: 'calc(180px - 2.5rem)', fontSize: '0.8125rem' }}
-            >
+            <div className="p-4 font-mono overflow-y-auto text-xs" style={{ height: 'calc(180px - 2.5rem)' }}>
               {activePanel === 'console' ? (
-                <div className="text-[#808080] flex flex-col gap-1">
-                  <p>
-                    {'>'} Ready to execute{' '}
-                    <span className="text-[#0a72ef]">solution.py</span>…
-                  </p>
-                  <p>{'>'} Waiting for input…</p>
-                  {!isRunning && (
-                    <p className="text-[#808080] opacity-60 mt-1">
-                      Press "Run Code" to execute against test cases.
-                    </p>
-                  )}
+                <div className="text-[#808080]">
+                  {consoleOutput.length > 0 ? consoleOutput.map((line, i) => <p key={i}>{'>'} {line}</p>) : <p>{'>'} Ready. Press "Run Code".</p>}
                 </div>
               ) : (
-                <div className="flex flex-col gap-2">
-                  <div
-                    className="p-3 rounded-standard bg-[#fafafa]"
-                    style={{ boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.06)' }}
-                  >
-                    <p className="text-[#808080] mb-1">Input:</p>
-                    <code className="text-[#171717]">
-                      root = [3, 9, 20, null, null, 15, 7]
-                    </code>
-                  </div>
-                  <div
-                    className="p-3 rounded-standard bg-[#fafafa]"
-                    style={{ boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.06)' }}
-                  >
-                    <p className="text-[#808080] mb-1">Expected Output:</p>
-                    <code className="text-[#0a72ef]">
-                      [[3], [9, 20], [15, 7]]
-                    </code>
-                  </div>
-                </div>
+                <div className="text-[#808080]">{'>'} Waiting for full submission...</div>
               )}
             </div>
           </div>
         </section>
       </div>
 
-      {/* ── BOTTOM ACTION BAR ──────────────────────────────────────── */}
-      <footer
-        className="flex items-center justify-between px-6 h-14 bg-white flex-shrink-0"
-        style={{
-          boxShadow:
-            '0px 0px 0px 1px rgba(0,0,0,0.08), 0px -2px 4px rgba(0,0,0,0.04)',
-        }}
-      >
-        <div className="flex items-center gap-4">
-          <button
-            id="hint-btn"
-            className="flex items-center gap-2 text-[#666666] hover:text-[#171717] transition-colors duration-150"
-            style={{ fontSize: '0.8125rem', fontWeight: '500' }}
-          >
-            <span
-              className="material-symbols-outlined text-sm"
-              aria-hidden="true"
-            >
-              lightbulb
-            </span>
-            Show Hint
-          </button>
-          <div className="h-4 w-px bg-[#ebebeb]" aria-hidden="true" />
-          <div
-            className="flex items-center gap-3 font-mono text-[#808080]"
-            style={{ fontSize: '0.75rem' }}
-          >
-            <span>Memory: 0 MB</span>
-            <span>Runtime: 0 ms</span>
-          </div>
-        </div>
-
+      <footer className="flex items-center justify-between px-6 h-14 bg-white border-t border-[#ebebeb]">
+        <div className="text-[#808080] text-xs font-mono">0 ms | 0 MB</div>
         <div className="flex items-center gap-2">
-          <button
-            id="run-code-btn"
-            className="btn-ghost py-2 px-5"
-            onClick={handleRun}
-            disabled={isRunning}
-          >
-            {isRunning ? (
-              <>
-                <span
-                  className="material-symbols-outlined text-sm animate-spin"
-                  aria-hidden="true"
-                >
-                  progress_activity
-                </span>
-                Running…
-              </>
-            ) : (
-              <>
-                <span
-                  className="material-symbols-outlined text-sm"
-                  aria-hidden="true"
-                >
-                  play_arrow
-                </span>
-                Run Code
-              </>
-            )}
-          </button>
-          <button
-            id="submit-btn"
-            className="btn-primary py-2 px-6"
-            style={{ background: '#ff5b4f' }}
-            onClick={handleSubmit}
-          >
-            <span
-              className="material-symbols-outlined text-sm"
-              aria-hidden="true"
-            >
-              upload
-            </span>
-            Submit Solution
-          </button>
+          <button className="btn-ghost py-2 px-5" onClick={handleRun} disabled={isRunning}>Run Code</button>
+          <button className="btn-primary py-2 px-6 bg-[#ff5b4f]" onClick={handleSubmit} disabled={isRunning}>Submit Solution</button>
         </div>
       </footer>
     </div>

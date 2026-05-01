@@ -7,8 +7,7 @@ export default function Navbar() {
 
   const navLinks = [
     { to: '/dashboard', label: 'Dashboard' },
-    { to: '/problem/1', label: 'Practice' },
-    { to: '/feedback', label: 'Feedback' },
+    { to: '/problem/69ec6db19f4c8591447ccc67', label: 'Practice' },
   ];
 
   return (
@@ -17,7 +16,7 @@ export default function Navbar() {
       style={{ boxShadow: '0px 0px 0px 1px rgba(0,0,0,0.08)' }}
     >
       <div className="max-w-content mx-auto px-6 h-14 flex items-center justify-between gap-8">
-        {/* Logo */}
+        {}
         <NavLink
           to="/"
           className="flex items-center gap-2 flex-shrink-0"
@@ -32,7 +31,7 @@ export default function Navbar() {
           </span>
         </NavLink>
 
-        {/* Desktop nav links */}
+        {}
         <nav className="hidden md:flex items-center gap-1" aria-label="Main navigation">
           {navLinks.map(({ to, label }) => (
             <NavLink
@@ -51,19 +50,36 @@ export default function Navbar() {
           ))}
         </nav>
 
-        {/* Right side CTAs */}
+        {}
         <div className="flex items-center gap-3">
-          {/* Generate button */}
+          {}
           <button
             id="navbar-generate-btn"
             className="btn-primary hidden sm:inline-flex"
-            onClick={() => navigate('/problem/1')}
+            onClick={async () => {
+              try {
+                const btn = document.getElementById('navbar-generate-btn');
+                if (btn) btn.innerHTML = '<span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span> Generating...';
+                
+                const response = await axios.post('http://localhost:8000/api/v1/generate/inputs', {
+                  user_prompt: "Generate a random medium-level DSA problem"
+                });
+                const { problem } = response.data;
+                navigate(`/problem/${problem._id}`);
+              } catch (err) {
+                console.error(err);
+                alert('Generation failed. Ensure AI Service is running on port 8000.');
+              } finally {
+                const btn = document.getElementById('navbar-generate-btn');
+                if (btn) btn.innerHTML = '<span class="material-symbols-outlined text-[16px]">bolt</span> Generate';
+              }
+            }}
           >
             <span className="material-symbols-outlined text-[16px]">bolt</span>
             Generate
           </button>
 
-          {/* Mobile hamburger */}
+          {}
           <button
             id="navbar-mobile-menu-btn"
             className="md:hidden p-2 rounded-standard text-[#666666] hover:text-[#171717] hover:bg-[#fafafa] transition-colors"
@@ -78,7 +94,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile dropdown */}
+      {}
       {mobileOpen && (
         <div
           className="md:hidden border-t border-[#ebebeb] bg-white px-6 py-4 flex flex-col gap-2 animate-slide-up"
@@ -102,7 +118,7 @@ export default function Navbar() {
           ))}
           <button
             className="btn-primary mt-2 justify-center"
-            onClick={() => { navigate('/problem/1'); setMobileOpen(false); }}
+            onClick={() => { navigate('/problem/69ec6db19f4c8591447ccc67'); setMobileOpen(false); }}
           >
             <span className="material-symbols-outlined text-[16px]">bolt</span>
             Generate Problem
